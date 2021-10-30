@@ -2,6 +2,22 @@ import curses
 import argparse
 import sys
 
+
+class Buffer:
+    def __init__(self, lines):
+        self.lines = lines
+
+    def __len__(self):
+        return len(self.lines)
+
+    def __getitem__(self, index):
+        return self.lines[index]
+    
+    @property
+    def bottom(self):
+        return len(self) - 1
+
+
 class Window:
 
     def __init__(self, n_rows, n_cols, row=0, col=0):
@@ -19,7 +35,7 @@ class Window:
             self.row -= 1
 
     def down(self, buffer, cursor):
-        if cursor.row == self.bottom + 1 and self.bottom < len(buffer) - 1:
+        if cursor.row == self.bottom + 1 and self.bottom < buffer.bottom:
             self.row += 1
 
     def translate(self, cursor):
@@ -51,7 +67,7 @@ class Cursor:
             self._clamp_col(buffer)
 
     def down(self, buffer):
-        if self.row < len(buffer) - 1:
+        if self.row < buffer.bottom:
             self.row += 1
             self._clamp_col(buffer)
 
@@ -68,7 +84,7 @@ class Cursor:
     def right(self, buffer):
         if self.col < len(buffer[self.row]):
             self.col += 1
-        elif self.row < len(buffer) - 1:
+        elif self.row < buffer.bottom:
             self.row += 1
             self.col = 0
 
@@ -79,7 +95,7 @@ def main(stdscr):
     args = parser.parse_args()
 
     with open(args.filename) as f:
-        buffer = f.readlines()
+        buffer = Buffer(f.read().splitlines())
 
     window = Window(curses.LINES - 1, curses.COLS - 1)
     cursor = Cursor()
