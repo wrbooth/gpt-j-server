@@ -25,6 +25,18 @@ class Buffer:
         self.lines.insert(row, current[:col])
         self.lines.insert(row + 1, current[col:])
 
+    def delete(self, cursor):
+        row, col = cursor.row, cursor.col
+        if (row, col) < (self.bottom, len(self[row])):
+            current = self.lines.pop(row)
+            if col < len(self[row]):
+                new = current[:col] + current[col + 1:]
+                self.lines.insert(row, new)
+            else:
+                next = self.lines.pop(row)
+                new = current + next
+                self.lines.insert(row, new)
+
     @property
     def bottom(self):
         return len(self) - 1
@@ -107,6 +119,12 @@ def right(window, buffer, cursor):
     window.horizontal_scroll(cursor)
 
 
+def left(window, buffer, cursor):
+    cursor.left(buffer)
+    window.up(cursor)
+    window.horizontal_scroll(cursor)
+
+
 def main(stdscr):
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
@@ -148,6 +166,12 @@ def main(stdscr):
         elif k == "\n":
             buffer.split(cursor)
             right(window, buffer, cursor)
+        elif k in ("KEY_DELETE", "\x04"):
+            buffer.delete(cursor)
+        elif k in ("KEY_BACKSPACE", "\x7f"):
+            if (cursor.row, cursor.col) > (0, 0):
+                left(window, buffer, cursor)
+                buffer.delete(cursor)
         else:
             buffer.insert(cursor, k)
             for _ in k:
