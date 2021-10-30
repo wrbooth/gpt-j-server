@@ -19,6 +19,12 @@ class Buffer:
         new = current[:col] + string + current[col:]
         self.lines.insert(row, new)
 
+    def split(self, cursor):
+        row, col = cursor.row, cursor.col
+        current = self.lines.pop(row)
+        self.lines.insert(row, current[:col])
+        self.lines.insert(row + 1, current[col:])
+
     @property
     def bottom(self):
         return len(self) - 1
@@ -138,6 +144,9 @@ def main(stdscr):
             window.up(cursor)
             window.horizontal_scroll(cursor)
         elif k == "KEY_RIGHT":
+            right(window, buffer, cursor)
+        elif k == "\n":
+            buffer.split(cursor)
             right(window, buffer, cursor)
         else:
             buffer.insert(cursor, k)
