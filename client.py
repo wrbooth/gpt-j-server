@@ -12,7 +12,13 @@ class Buffer:
 
     def __getitem__(self, index):
         return self.lines[index]
-    
+
+    def insert(self, cursor, string):
+        row, col = cursor.row, cursor.col
+        current = self.lines.pop(row)
+        new = current[:col] + string + current[col:]
+        self.lines.insert(row, new)
+
     @property
     def bottom(self):
         return len(self) - 1
@@ -89,6 +95,12 @@ class Cursor:
             self.col = 0
 
 
+def right(window, buffer, cursor):
+    cursor.right(buffer)
+    window.down(buffer, cursor)
+    window.horizontal_scroll(cursor)
+
+
 def main(stdscr):
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
@@ -126,9 +138,11 @@ def main(stdscr):
             window.up(cursor)
             window.horizontal_scroll(cursor)
         elif k == "KEY_RIGHT":
-            cursor.right(buffer)
-            window.down(buffer, cursor)
-            window.horizontal_scroll(cursor)
+            right(window, buffer, cursor)
+        else:
+            buffer.insert(cursor, k)
+            for _ in k:
+                right(window, buffer, cursor)
 
 
 if __name__ == "__main__":
