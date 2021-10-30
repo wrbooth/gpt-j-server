@@ -8,6 +8,24 @@ class Window:
         self.n_cols = n_cols
 
 
+class Cursor:
+    def __init__(self, row=0, col=0):
+        self.row = row
+        self.col = col
+
+    def up(self):
+        self.row -= 1
+
+    def down(self):
+        self.row += 1
+
+    def left(self):
+        self.col -= 1
+
+    def right(self):
+        self.col += 1
+
+
 def main(stdscr):
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
@@ -17,15 +35,25 @@ def main(stdscr):
         buffer = f.readlines()
 
     window = Window(curses.LINES - 1, curses.COLS - 1)
+    cursor = Cursor()
 
     while True:
         stdscr.erase()
         for row, line in enumerate(buffer[:window.n_rows]):
             stdscr.addstr(row, 0, line[:window.n_cols])
+        stdscr.move(cursor.row, cursor.col)
 
         k = stdscr.getkey()
         if k == "q":
             sys.exit(0)
+        elif k == "KEY_UP":
+            cursor.up()
+        elif k == "KEY_DOWN":
+            cursor.down()
+        elif k == "KEY_LEFT":
+            cursor.left()
+        elif k == "KEY_RIGHT":
+            cursor.right()
 
 
 if __name__ == "__main__":
