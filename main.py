@@ -14,8 +14,10 @@ app = Flask(__name__)
 def generate():
     content = request.get_json()
     input_ids = tokenizer(content['prompt'], return_tensors="pt").input_ids
+    token_len = len(input_ids)
+    max_length = content['max_length'] if 'max_length' in content else token_len + 50
     input_ids = input_ids.to(torch.device("cuda"))
-    gen_tokens = model.generate(input_ids, do_sample=True, temperature=0.9, max_length=content['max_length'],)
+    gen_tokens = model.generate(input_ids, do_sample=True, temperature=0.9, max_length=max_length)
     gen_text = tokenizer.batch_decode(gen_tokens)[0]
     return jsonify({"generated_text": gen_text})
 
