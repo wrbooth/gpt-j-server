@@ -25,6 +25,10 @@ class Window:
     def translate(self, cursor):
         return cursor.row - self.row, cursor.col - self.col
 
+    def horizontal_scroll(self, cursor, left_margin=5, right_margin=2):
+        n_pages = cursor.col // (self.n_cols - right_margin)
+        self.col = max(n_pages * self.n_cols - right_margin - left_margin, 0)
+
 
 class Cursor:
     def __init__(self, row=0, col=0, col_hint=None):
@@ -83,6 +87,10 @@ def main(stdscr):
     while True:
         stdscr.erase()
         for row, line in enumerate(buffer[window.row:window.row + window.n_rows]):
+            if row == cursor.row - window.row and window.col > 0:
+                line = "«" + line[window.col + 1:]
+            if len(line) > window.n_cols:
+                line = line[:window.n_cols - 1] + "»"
             stdscr.addstr(row, 0, line)
         stdscr.move(*window.translate(cursor))
 
@@ -92,15 +100,19 @@ def main(stdscr):
         elif k == "KEY_UP":
             cursor.up(buffer)
             window.up(cursor)
+            window.horizontal_scroll(cursor)
         elif k == "KEY_DOWN":
             cursor.down(buffer)
             window.down(buffer, cursor)
+            window.horizontal_scroll(cursor)
         elif k == "KEY_LEFT":
             cursor.left(buffer)
             window.up(cursor)
+            window.horizontal_scroll(cursor)
         elif k == "KEY_RIGHT":
             cursor.right(buffer)
             window.down(buffer, cursor)
+            window.horizontal_scroll(cursor)
 
 
 if __name__ == "__main__":
