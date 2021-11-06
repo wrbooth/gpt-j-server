@@ -3,9 +3,9 @@ from flask import Flask, request, jsonify
 from transformers import GPTJForCausalLM, AutoTokenizer
 import torch
 
-model = GPTJForCausalLM.from_pretrained("./gpt-j-6B", torch_dtype=torch.float16)
+model = GPTJForCausalLM.from_pretrained("../gpt-j-6B", torch_dtype=torch.float16)
 model = model.to(torch.device("cuda"))
-tokenizer = AutoTokenizer.from_pretrained("./gpt-j-6B")
+tokenizer = AutoTokenizer.from_pretrained("../gpt-j-6B")
 
 app = Flask(__name__)
 
